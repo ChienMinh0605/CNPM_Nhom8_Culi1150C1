@@ -1,0 +1,120 @@
+' ============================================================
+'  Biểu đồ lớp thiết kế – Phân hệ Bán vé và soát vé (E05)
+'  Xem trực tuyến: dán toàn bộ nội dung vào https://www.plantuml.com/plantuml
+' ============================================================
+@startuml CD02_ThietKe_BanVe_E05
+title Hình 11. Biểu đồ lớp thiết kế – Phân hệ Bán vé và soát vé (E05)
+
+skinparam defaultFontName "Noto Sans"
+skinparam shadowing false
+skinparam ArrowColor #374151
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderThickness 1.5
+}
+skinparam note {
+  BackgroundColor #FFFBEA
+  BorderColor #C9A227
+}
+
+' ---------- Tầng giao tiếp ----------
+class CheckInController <<controller>> #EAF2FD {
+  - checkInService: CheckInService
+  + checkIn(code: String): CheckInResult
+}
+class TicketOrderController <<controller>> #EAF2FD {
+  - orderService: TicketOrderService
+  + createOrder(req: CreateOrderRequest): PaymentRedirect
+  + getMyOrders(): List<OrderView>
+  + vnpayReturn(params: Map): ResultPage
+  + vnpayIpn(params: Map): IpnResponse
+}
+class ExpiredOrderJob <<scheduler>> #FDF4E3 {
+  + run(): void {mỗi 1 phút}
+}
+
+' ---------- Tầng nghiệp vụ ----------
+class CheckInService <<service>> #E8EBF5 {
+  - orderRepo: TicketOrderRepository
+  + checkIn(code: String, staffId: Long): CheckInResult
+  - validate(order: TicketOrder, today: Date): String
+}
+class TicketOrderService <<service>> #E8EBF5 {
+  - HOLD_MINUTES: int = 15
+  - orderRepo: TicketOrderRepository
+  - slotRepo: TimeSlotRepository
+  - typeRepo: TicketTypeRepository
+  - paymentGateway: PaymentGateway
+  - emailSender: EmailSender
+  - qrGenerator: QrCodeGenerator
+  + createOrder(memberId, visitDate, slotId, items): TicketOrder
+  + remainingSeats(slotId: Long, date: Date): int
+  + confirmPayment(result: PaymentResult): void
+  + cancelExpiredOrders(now: DateTime): int
+  + getOrdersOf(memberId: Long): List<TicketOrder>
+}
+class CheckInResult <<dto>> #F3F4F6 {
+  + valid: boolean
+  + reason: String
+  + guestCounts: Map<String, Integer>
+}
+class QrCodeGenerator <<component>> #F3F4F6 {
+  + generate(orderCode: String): byte[]
+}
+
+' ---------- Tầng truy cập dữ liệu ----------
+class TicketOrderRepository <<repository>> #E6F4F1 {
+  + findByCode(code: String): TicketOrder
+  + findByMember(memberId: Long): List<TicketOrder>
+  + findExpired(now: DateTime): List<TicketOrder>
+  + save(order: TicketOrder): TicketOrder
+}
+class TimeSlotRepository <<repository>> #E6F4F1 {
+  + findById(id: Long): TimeSlot
+  + countSoldSeats(slotId: Long, date: Date): int
+  + isClosedDay(date: Date): boolean
+}
+class TicketTypeRepository <<repository>> #E6F4F1 {
+  + findActiveByIds(ids: List<Long>): List<TicketType>
+}
+
+' ---------- Tích hợp bên ngoài ----------
+interface PaymentGateway #F1EAF8 {
+  + createPaymentUrl(order: TicketOrder): String
+  + verify(params: Map): PaymentResult
+}
+class VnpayGateway #F1EAF8 {
+  - tmnCode: String
+  - hashSecret: String
+  + createPaymentUrl(order: TicketOrder): String
+  + verify(params: Map): PaymentResult
+}
+interface EmailSender #F1EAF8 {
+  + sendTicket(order: TicketOrder, qr: byte[]): void
+}
+class SmtpEmailSender #F1EAF8 {
+  + sendTicket(order: TicketOrder, qr: byte[]): void
+}
+
+' ---------- Quan hệ ----------
+CheckInController --> CheckInService
+CheckInService ..> CheckInResult : <<create>>
+CheckInService --> TicketOrderRepository
+TicketOrderController --> TicketOrderService
+ExpiredOrderJob --> TicketOrderService
+TicketOrderService --> TicketOrderRepository
+TicketOrderService --> TimeSlotRepository
+TicketOrderService --> TicketTypeRepository
+TicketOrderService --> PaymentGateway
+TicketOrderService --> EmailSender
+TicketOrderService --> QrCodeGenerator
+PaymentGateway <|.. VnpayGateway
+EmailSender <|.. SmtpEmailSender
+
+note right of ExpiredOrderJob
+  Đơn quá HOLD_MINUTES chưa thanh toán
+  bị hủy và trả chỗ (FR41).
+end note
+note "Lớp thực thể TicketOrder, OrderItem, TicketType,\nTimeSlot, Payment: xem Hình 10.\nTên lớp có thể đổi theo framework được chọn." as N1
+@enduml

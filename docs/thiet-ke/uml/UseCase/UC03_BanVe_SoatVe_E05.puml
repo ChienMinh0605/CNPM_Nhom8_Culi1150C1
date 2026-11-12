@@ -1,0 +1,95 @@
+' ============================================================
+'  Biểu đồ use case chi tiết – Phân hệ Bán vé và soát vé (E05)
+'  Xem trực tuyến: dán toàn bộ nội dung vào https://www.plantuml.com/plantuml
+'  hoặc trong draw.io: Sắp xếp (Arrange) > Chèn (Insert) > Nâng cao (Advanced) > PlantUML
+' ============================================================
+@startuml UC03_BanVe_SoatVe_E05
+title Hình 4. Biểu đồ use case chi tiết – Phân hệ Bán vé và soát vé (E05)
+left to right direction
+
+skinparam defaultFontName "Noto Sans"
+skinparam shadowing false
+skinparam ArrowColor #374151
+skinparam ArrowThickness 1.2
+skinparam actor {
+  BorderColor #1E3A5F
+  BackgroundColor #1E3A5F
+  FontStyle bold
+  FontColor #1E3A5F
+}
+skinparam usecase {
+  BorderThickness 1.5
+  FontStyle bold
+  FontColor #7F1D1D
+}
+skinparam rectangle {
+  BorderColor #6B7280
+  BorderStyle dashed
+  BackgroundColor #FCFCFD
+  FontStyle bold
+  FontSize 15
+}
+skinparam note {
+  BackgroundColor #FFFBEA
+  BorderColor #C9A227
+}
+
+' ---------- Tác nhân ----------
+actor "Quản lý bảo tàng" as QLBT
+actor "Thành viên" as TV
+actor "Nhân viên quầy vé" as NVQV
+actor "VNPay Sandbox" as VNPAY <<hệ thống>> #6B46A3;line:6B46A3
+actor "Dịch vụ Email" as EMAIL <<hệ thống>> #6B46A3;line:6B46A3
+
+rectangle "Phân hệ Bán vé và soát vé (E05)" {
+  ' Use case chính (tô nền)
+  usecase "Thiết lập loại vé\n& giá vé" as UC_LV #FBECEC;line:B23A3A
+  usecase "Thiết lập khung giờ\n& sức chứa" as UC_KG #FBECEC;line:B23A3A
+  usecase "Đánh dấu ngày đóng cửa" as UC_DC #FBECEC;line:B23A3A
+  usecase "Mua vé online" as UC_MV #FBECEC;line:B23A3A
+  usecase "Xem vé của tôi" as UC_XV #FBECEC;line:B23A3A
+  usecase "Soát vé bằng mã QR" as UC_SV #FBECEC;line:B23A3A
+
+  ' Use case con (include / extend) – nền trắng, viền đứt
+  usecase "Chọn ngày, khung giờ\n& loại vé" as UC_CV #FFFFFF;line:B23A3A;line.dashed
+  usecase "Thanh toán qua VNPay" as UC_TT #FFFFFF;line:B23A3A;line.dashed
+  usecase "Nhận vé QR\nqua email" as UC_EM #FFFFFF;line:B23A3A;line.dashed
+  usecase "Hủy đơn quá hạn" as UC_HD #FFFFFF;line:B23A3A;line.dashed
+  usecase "Kiểm tra tính hợp lệ\ncủa vé" as UC_KT #FFFFFF;line:B23A3A;line.dashed
+  usecase "Nhập tay mã vé" as UC_NT #FFFFFF;line:B23A3A;line.dashed
+}
+
+' ---------- Liên kết tác nhân ----------
+QLBT -- UC_LV
+QLBT -- UC_KG
+QLBT -- UC_DC
+TV -- UC_MV
+TV -- UC_XV
+UC_SV -- NVQV
+UC_TT -- VNPAY
+UC_EM -- EMAIL
+
+' ---------- include / extend ----------
+UC_MV ..> UC_CV : <<include>>
+UC_MV ..> UC_TT : <<include>>
+UC_MV ..> UC_EM : <<include>>
+UC_HD ..> UC_MV : <<extend>>
+UC_SV ..> UC_KT : <<include>>
+UC_NT ..> UC_SV : <<extend>>
+
+note right of UC_HD
+  Điều kiện mở rộng:
+  đơn quá 15 phút chưa thanh toán,
+  hệ thống tự hủy và trả lại chỗ.
+end note
+
+note right of UC_NT
+  Điều kiện mở rộng:
+  khi không quét được mã QR.
+end note
+
+note bottom of UC_XV
+  Tiền điều kiện: các tác nhân đã đăng nhập
+  (UC Đăng nhập – E01).
+end note
+@enduml
