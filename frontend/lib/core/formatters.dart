@@ -1,4 +1,5 @@
 /// Định dạng hiển thị theo NFR10.
+library;
 
 /// Tiền VNĐ, phân cách hàng nghìn bằng dấu chấm: 120000 -> "120.000 ₫".
 String formatVnd(int amount) {

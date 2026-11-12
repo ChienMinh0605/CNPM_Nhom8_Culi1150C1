@@ -54,6 +54,7 @@ docs: bổ sung ERD
 
 - Chạy `dart format .` và `flutter analyze` trước khi commit.
 - Tên file `snake_case.dart`, tên lớp `PascalCase`.
+- Import giao diện Material từ `package:material_ui/material_ui.dart`, không dùng `package:flutter/material.dart` (đã lỗi thời từ Flutter 3.47, `flutter analyze` sẽ báo).
 - Mỗi nhóm chức năng một thư mục trong `lib/features/`; phần dùng chung đặt ở `lib/core/`.
 - Chữ hiển thị bằng tiếng Việt; ngày và tiền dùng hàm trong `lib/core/formatters.dart` (NFR10).
 

@@ -10,7 +10,7 @@ jobs:
     name: Backend – unit test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Cấu hình
         run: cmake -S backend -B backend/build -DBUILD_SERVER=OFF -DBUILD_TESTS=ON
       - name: Biên dịch
@@ -22,7 +22,7 @@ jobs:
     name: Backend – build image
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build
         run: docker build -t dcsv-backend ./backend
 
@@ -33,7 +33,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
         with:
           channel: stable

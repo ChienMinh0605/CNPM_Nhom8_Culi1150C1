@@ -63,7 +63,7 @@ docker-compose.yml  PostgreSQL + backend
 
 - Git
 - Docker và Docker Compose (plugin `docker compose`)
-- Flutter SDK bản stable (để chạy frontend)
+- Flutter SDK bản stable, từ 3.47 trở lên (để chạy frontend)
 
 ### 1. Lấy mã nguồn và tạo file cấu hình
 
