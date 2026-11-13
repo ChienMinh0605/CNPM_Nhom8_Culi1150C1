@@ -1,0 +1,125 @@
+' ============================================================
+'  Biểu đồ use case tổng quát – DCSV Digital CMS
+'  Xem trực tuyến: dán toàn bộ nội dung vào https://www.plantuml.com/plantuml
+'  hoặc trong draw.io: Sắp xếp (Arrange) > Chèn (Insert) > Nâng cao (Advanced) > PlantUML
+' ============================================================
+@startuml UC01_TongQuat
+title Hình 2. Biểu đồ use case tổng quát – DCSV Digital CMS
+left to right direction
+
+skinparam defaultFontName "Noto Sans"
+skinparam shadowing false
+skinparam ArrowColor #374151
+skinparam ArrowThickness 1.2
+skinparam actor {
+  BorderColor #1E3A5F
+  BackgroundColor #1E3A5F
+  FontStyle bold
+  FontColor #1E3A5F
+}
+skinparam usecase {
+  BorderThickness 1.5
+  FontStyle bold
+}
+skinparam rectangle {
+  BorderColor #6B7280
+  BorderStyle dashed
+  BackgroundColor #FCFCFD
+  FontStyle bold
+  FontSize 15
+}
+skinparam note {
+  BackgroundColor #FFFBEA
+  BorderColor #C9A227
+}
+
+' ---------- Tác nhân ----------
+actor "Khách tham quan" as KTQ
+actor "Thành viên" as TV
+actor "Quản trị viên" as QTV
+actor "Chuyên viên sưu tập" as CVST
+actor "Biên tập viên" as BTV
+actor "Quản lý bảo tàng" as QLBT
+actor "Nhân viên quầy vé" as NVQV
+actor "//Nhân viên bảo tàng//" as NVBT
+actor "VNPay Sandbox" as VNPAY <<hệ thống>> #6B46A3;line:6B46A3
+actor "Dịch vụ Email" as EMAIL <<hệ thống>> #6B46A3;line:6B46A3
+
+' ---------- Use case (màu theo Epic) ----------
+rectangle "Hệ thống DCSV Digital CMS" {
+  ' E01 · Quản lý người dùng
+  usecase "Đăng ký tài khoản" as UC_DK #E8EBF5;line:4F5D95;text:2E3A6E
+  usecase "Đăng nhập" as UC_DN #E8EBF5;line:4F5D95;text:2E3A6E
+  usecase "Quên mật khẩu" as UC_QMK #E8EBF5;line:4F5D95;text:2E3A6E
+  usecase "Quản lý tài khoản\nnhân viên & vai trò" as UC_QLTK #E8EBF5;line:4F5D95;text:2E3A6E
+
+  ' E02 · Hiện vật & tài nguyên số
+  usecase "Quản lý hồ sơ hiện vật\n& khu trưng bày" as UC_HS #E6F4F1;line:1F7A6B;text:155E52
+  usecase "Quản lý ảnh &\ntài nguyên số" as UC_TN #E6F4F1;line:1F7A6B;text:155E52
+
+  ' E03 · Biên tập & duyệt nội dung
+  usecase "Biên tập mô tả & triển lãm,\ngửi duyệt" as UC_BT #FDF4E3;line:B7791F;text:7A4B0E
+  usecase "Duyệt, xuất bản\n& gỡ nội dung" as UC_DUYET #FDF4E3;line:B7791F;text:7A4B0E
+
+  ' E04 · Cổng thông tin công khai
+  usecase "Xem trang chủ &\nthông tin tham quan" as UC_TC #EAF2FD;line:3B6FB6;text:1E3A5F
+  usecase "Duyệt hiện vật theo\nkhu trưng bày" as UC_KHU #EAF2FD;line:3B6FB6;text:1E3A5F
+  usecase "Tìm kiếm & xem\nchi tiết hiện vật" as UC_TK #EAF2FD;line:3B6FB6;text:1E3A5F
+  usecase "Xem triển lãm trực tuyến" as UC_TL #EAF2FD;line:3B6FB6;text:1E3A5F
+
+  ' E05 · Bán vé & soát vé
+  usecase "Thiết lập loại vé,\nkhung giờ & ngày đóng cửa" as UC_TLV #FBECEC;line:B23A3A;text:7F1D1D
+  usecase "Mua vé online" as UC_MV #FBECEC;line:B23A3A;text:7F1D1D
+  usecase "Xem vé của tôi" as UC_XV #FBECEC;line:B23A3A;text:7F1D1D
+  usecase "Soát vé bằng mã QR" as UC_SV #FBECEC;line:B23A3A;text:7F1D1D
+
+  ' E06 · Thống kê & báo cáo
+  usecase "Xem báo cáo doanh thu\n& lượt khách" as UC_BC #F3F4F6;line:4B5563;text:1F2937
+}
+
+' ---------- Kế thừa ----------
+TV --|> KTQ
+QTV --|> NVBT
+CVST --|> NVBT
+BTV --|> NVBT
+QLBT --|> NVBT
+NVQV --|> NVBT
+
+' ---------- Công chúng ----------
+KTQ -- UC_DK
+KTQ -- UC_TC
+KTQ -- UC_KHU
+KTQ -- UC_TK
+KTQ -- UC_TL
+TV -- UC_DN
+TV -- UC_MV
+TV -- UC_XV
+
+' ---------- Nội bộ ----------
+UC_DN -- NVBT
+UC_QLTK -- QTV
+UC_HS -- CVST
+UC_TN -- CVST
+UC_BT -- BTV
+UC_DUYET -- QLBT
+UC_TLV -- QLBT
+UC_BC -- QLBT
+UC_SV -- NVQV
+
+' ---------- Quan hệ giữa use case ----------
+UC_QMK ..> UC_DN : <<extend>>
+
+' ---------- Hệ thống bên ngoài ----------
+UC_MV -- VNPAY
+UC_MV -- EMAIL
+
+legend right
+  |= Màu |= Epic |
+  |<#E8EBF5>| E01 · Quản lý người dùng |
+  |<#E6F4F1>| E02 · Hiện vật & tài nguyên số |
+  |<#FDF4E3>| E03 · Biên tập & duyệt nội dung |
+  |<#EAF2FD>| E04 · Cổng thông tin công khai |
+  |<#FBECEC>| E05 · Bán vé & soát vé |
+  |<#F3F4F6>| E06 · Thống kê & báo cáo |
+endlegend
+@enduml

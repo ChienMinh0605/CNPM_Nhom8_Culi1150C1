@@ -1,0 +1,49 @@
+' ============================================================
+'  Biểu đồ trạng thái – Vòng đời đơn vé
+'  Xem trực tuyến: dán toàn bộ nội dung vào https://www.plantuml.com/plantuml
+' ============================================================
+@startuml SM02_VongDoiDonVe
+title Hình 9. Biểu đồ trạng thái – Vòng đời đơn vé
+
+skinparam defaultFontName "Noto Sans"
+skinparam shadowing false
+skinparam ArrowColor #374151
+skinparam state {
+  BorderThickness 1.8
+  FontStyle bold
+  FontSize 15
+  AttributeFontSize 12
+  AttributeFontStyle italic
+}
+skinparam note {
+  BackgroundColor #FFFBEA
+  BorderColor #C9A227
+}
+
+state "Chờ thanh toán" as CHO #FDF4E3;line:B7791F
+CHO : entry / giữ chỗ 15 phút
+
+state "Đã thanh toán" as TT #EAF2FD;line:3B6FB6
+TT : entry / sinh mã QR,
+TT : gửi email vé
+
+state "Đã sử dụng" as SD #E6F4F1;line:1F7A6B
+SD : entry / ghi giờ vào cổng
+
+state "Đã hủy" as HUY #FBECEC;line:B23A3A
+HUY : entry / trả lại chỗ
+
+[*] -right-> CHO : đặt vé [đủ chỗ]
+CHO -> CHO : thanh toán thất bại / báo lỗi
+CHO -right-> TT : thanh toán thành công\n[checksum hợp lệ]
+TT -> TT : soát vé QR [sai ngày] / báo «Không hợp lệ»
+TT -right-> SD : soát vé QR\n[đúng ngày]
+CHO -down-> HUY : after(15 phút)\n[chưa thanh toán]
+SD -down-> [*]
+HUY -left-> [*]
+
+note bottom of TT
+  Mỗi đơn có 1 mã QR, soát 1 lần cho cả đoàn.
+  Đơn giữ nguyên giá vé tại thời điểm mua.
+end note
+@enduml

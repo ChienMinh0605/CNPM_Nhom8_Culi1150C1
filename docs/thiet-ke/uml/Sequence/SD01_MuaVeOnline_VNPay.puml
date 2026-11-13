@@ -1,0 +1,105 @@
+' ============================================================
+'  Biểu đồ tuần tự – Mua vé online và thanh toán qua VNPay (E05)
+'  Xem trực tuyến: dán toàn bộ nội dung vào https://www.plantuml.com/plantuml
+' ============================================================
+@startuml SD01_MuaVeOnline_VNPay
+title Hình 12. Biểu đồ tuần tự – Mua vé online và thanh toán qua VNPay (E05)
+
+skinparam defaultFontName "Noto Sans"
+skinparam shadowing false
+skinparam ArrowColor #374151
+skinparam sequenceMessageAlign center
+skinparam note {
+  BackgroundColor #FFFBEA
+  BorderColor #C9A227
+}
+autonumber "0."
+
+actor "Thành viên" as TV #1E3A5F
+boundary "Giao diện web" as UI #EAF2FD
+participant "VNPay Sandbox\n<size:10>«hệ thống ngoài»</size>" as VNP #F1EAF8
+participant "Controller đơn vé\n<size:10>:TicketOrderController</size>" as TOC #EAF2FD
+participant "Xử lý đơn vé\n<size:10>:TicketOrderService</size>" as TOS #E8EBF5
+participant "Dữ liệu khung giờ\n<size:10>:TimeSlotRepository</size>" as TSR #E6F4F1
+participant "Dữ liệu đơn vé\n<size:10>:TicketOrderRepository</size>" as TOR #E6F4F1
+participant "Cổng thanh toán\n<size:10>:VnpayGateway</size>" as VG #F1EAF8
+participant "Gửi email\n<size:10>:EmailSender</size>" as ES #F1EAF8
+
+== ① Đặt vé và giữ chỗ ==
+TV -> UI : Chọn ngày, khung giờ, loại vé, số lượng
+UI -> TOC : Gửi yêu cầu đặt vé\n<size:10><i>POST /orders</i></size>
+activate TOC
+TOC -> TOS : Tạo đơn vé\n<size:10><i>createOrder(memberId, date, slotId, items)</i></size>
+activate TOS
+TOS -> TSR : Kiểm tra ngày đóng cửa\n<size:10><i>isClosedDay(date)</i></size>
+activate TSR
+TSR --> TOS : không đóng cửa
+deactivate TSR
+TOS -> TSR : Đếm số vé đã bán của khung giờ\n<size:10><i>countSoldSeats(slotId, date)</i></size>
+activate TSR
+TSR --> TOS : số vé đã bán
+deactivate TSR
+
+break số vé đã bán + số vé đặt > sức chứa
+  TOS --> TOC : báo hết chỗ
+  TOC --> UI : lỗi 409 – Hết chỗ
+  UI --> TV : thông báo hết chỗ, chọn khung giờ khác
+end
+
+TOS -> TOR : Lưu đơn «Chờ thanh toán», giữ chỗ 15 phút\n<size:10><i>save(order)</i></size>
+activate TOR
+TOR --> TOS : đơn vé
+deactivate TOR
+TOS -> VG : Tạo đường dẫn thanh toán\n<size:10><i>createPaymentUrl(order)</i></size>
+activate VG
+VG --> TOS : paymentUrl
+deactivate VG
+TOS --> TOC : paymentUrl
+deactivate TOS
+TOC --> UI : chuyển hướng sang VNPay (302)
+deactivate TOC
+
+== ② Thành viên thanh toán trên VNPay ==
+UI -> VNP : Mở trang thanh toán
+TV -> VNP : Nhập thẻ thử nghiệm, xác nhận thanh toán
+
+== ③ Hệ thống xác nhận kết quả ==
+VNP -> TOC : Gửi kết quả giao dịch\n<size:10><i>IPN callback (vnp_params)</i></size>
+activate TOC
+TOC -> TOS : Xác nhận thanh toán\n<size:10><i>confirmPayment(params)</i></size>
+activate TOS
+TOS -> VG : Kiểm tra chữ ký kết quả\n<size:10><i>verify(params)</i></size>
+activate VG
+VG --> TOS : kết quả hợp lệ / không hợp lệ
+deactivate VG
+
+alt chữ ký hợp lệ và thanh toán thành công
+  TOS -> TOR : Cập nhật đơn «Đã thanh toán», lưu mã QR\n<size:10><i>markPaid(), save(order)</i></size>
+  activate TOR
+  TOR --> TOS : đã lưu
+  deactivate TOR
+  TOS ->> ES : Gửi email kèm vé QR\n<size:10><i>sendTicket(order, qr)</i></size>
+else thất bại hoặc sai chữ ký
+  TOS -> TOR : Ghi nhận thất bại, đơn vẫn «Chờ thanh toán»\n<size:10><i>save(payment)</i></size>
+  activate TOR
+  TOR --> TOS : đã lưu
+  deactivate TOR
+end
+TOS --> TOC : kết quả xử lý
+deactivate TOS
+TOC --> VNP : phản hồi IPN (RspCode)
+deactivate TOC
+
+== ④ Trả kết quả cho Thành viên ==
+VNP -> UI : Chuyển hướng về trang kết quả\n<size:10><i>returnUrl</i></size>
+UI -> TOC : Lấy kết quả thanh toán\n<size:10><i>GET /payment/return</i></size>
+activate TOC
+TOC --> UI : trang kết quả + mã QR
+deactivate TOC
+UI --> TV : hiển thị kết quả và vé QR
+
+note over TOC, TOR
+  Nếu sau 15 phút đơn vẫn «Chờ thanh toán», ExpiredOrderJob tự hủy đơn
+  và trả lại chỗ (FR41, Hình 6, Hình 9).
+end note
+@enduml

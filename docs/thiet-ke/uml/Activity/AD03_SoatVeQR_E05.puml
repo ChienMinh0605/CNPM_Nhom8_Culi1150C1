@@ -1,0 +1,65 @@
+' ============================================================
+'  Biểu đồ hoạt động – Quy trình soát vé bằng mã QR (E05)
+'  Xem trực tuyến: dán toàn bộ nội dung vào https://www.plantuml.com/plantuml
+' ============================================================
+@startuml AD03_SoatVeQR_E05
+title Hình 7. Biểu đồ hoạt động – Quy trình soát vé bằng mã QR (E05)
+
+skinparam defaultFontName "Noto Sans"
+skinparam shadowing false
+skinparam ArrowColor #374151
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #374151
+  FontSize 13
+  DiamondBackgroundColor #FFFFFF
+  DiamondBorderColor #374151
+  DiamondFontStyle bold
+}
+skinparam swimlane {
+  BorderColor #6B7280
+  TitleFontStyle bold
+  TitleFontSize 15
+}
+skinparam note {
+  BackgroundColor #FFFBEA
+  BorderColor #C9A227
+}
+
+|#F3F8FE|Khách tham quan / Thành viên|
+start
+:Xuất trình mã QR (điện thoại hoặc vé in);
+note right: Mỗi đơn có 1 mã QR,\nsoát 1 lần cho cả đoàn.
+|#FDF5F5|Nhân viên quầy vé|
+:Quét mã QR bằng camera;
+if (Quét được?) then ([có])
+else ([không])
+  :Nhập tay mã vé;
+endif
+|#F4F5FA|Hệ thống|
+:Tìm đơn theo mã vé;
+if (Tìm thấy đơn?) then ([có])
+  if (Đã thanh toán?) then ([có])
+    if (Đúng ngày tham quan?) then ([có])
+      if (Chưa sử dụng?) then ([có])
+        :Chuyển vé sang «Đã sử dụng», ghi giờ vào;
+        :Hiển thị «HỢP LỆ» và số khách theo loại vé;
+        |Nhân viên quầy vé|
+        :Cho đoàn khách vào cổng;
+        |Khách tham quan / Thành viên|
+        :Vào tham quan;
+        stop
+      else ([đã dùng])
+      endif
+    else ([sai ngày])
+    endif
+  else ([chưa])
+  endif
+else ([không])
+endif
+|Hệ thống|
+:Hiển thị «KHÔNG HỢP LỆ» kèm lý do;
+|Nhân viên quầy vé|
+:Từ chối, hướng dẫn khách ra quầy hỗ trợ;
+stop
+@enduml

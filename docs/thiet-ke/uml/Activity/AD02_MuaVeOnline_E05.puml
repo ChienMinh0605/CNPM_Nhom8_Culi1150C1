@@ -1,0 +1,60 @@
+' ============================================================
+'  Biểu đồ hoạt động – Quy trình mua vé online (E05)
+'  Xem trực tuyến: dán toàn bộ nội dung vào https://www.plantuml.com/plantuml
+' ============================================================
+@startuml AD02_MuaVeOnline_E05
+title Hình 6. Biểu đồ hoạt động – Quy trình mua vé online (E05)
+
+skinparam defaultFontName "Noto Sans"
+skinparam shadowing false
+skinparam ArrowColor #374151
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #374151
+  FontSize 13
+  DiamondBackgroundColor #FFFFFF
+  DiamondBorderColor #374151
+  DiamondFontStyle bold
+}
+skinparam swimlane {
+  BorderColor #6B7280
+  TitleFontStyle bold
+  TitleFontSize 15
+}
+
+|#F3F8FE|Thành viên|
+start
+:Chọn ngày tham quan (trong 30 ngày tới);
+repeat
+  :Chọn khung giờ, loại vé và số lượng;
+  :Bấm «Thanh toán»;
+  |#F4F5FA|Hệ thống|
+  :Kiểm tra số chỗ còn lại của khung giờ;
+repeat while (Đủ chỗ?) is ([không] báo hết chỗ) not ([có])
+:Tạo đơn «Chờ thanh toán», giữ chỗ 15 phút;
+:Chuyển hướng sang cổng VNPay;
+|#F7F3FC|VNPay Sandbox|
+:Hiển thị trang thanh toán;
+:Thành viên thanh toán (thẻ thử nghiệm);
+:Gửi kết quả giao dịch (IPN + chuyển hướng);
+|Hệ thống|
+:Kiểm tra chữ ký (checksum) của kết quả;
+if (Thanh toán thành công?) then ([có])
+  :Cập nhật «Đã thanh toán», sinh mã QR;
+  fork
+    :Gửi email kèm vé QR;
+  fork again
+    :Lưu vé vào «Vé của tôi»;
+  end fork
+  |Thành viên|
+  :Nhận vé QR (email và trang «Vé của tôi»);
+  stop
+else ([không])
+  |Hệ thống|
+  :Báo thanh toán thất bại;
+  :Chờ hết 15 phút giữ chỗ;
+  note right: Sự kiện thời gian:\nđơn quá 15 phút chưa thanh toán
+  :Hủy đơn, trả lại chỗ;
+  end
+endif
+@enduml

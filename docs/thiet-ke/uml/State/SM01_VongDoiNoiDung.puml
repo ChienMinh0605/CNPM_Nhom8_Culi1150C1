@@ -1,0 +1,57 @@
+' ============================================================
+'  Biểu đồ trạng thái – Vòng đời nội dung (trang hiện vật / trang triển lãm)
+'  Xem trực tuyến: dán toàn bộ nội dung vào https://www.plantuml.com/plantuml
+' ============================================================
+@startuml SM01_VongDoiNoiDung
+title Hình 8. Biểu đồ trạng thái – Vòng đời nội dung (trang hiện vật / trang triển lãm)
+
+skinparam defaultFontName "Noto Sans"
+skinparam shadowing false
+skinparam ArrowColor #374151
+skinparam state {
+  BorderThickness 1.8
+  FontStyle bold
+  FontSize 15
+  AttributeFontSize 12
+  AttributeFontStyle italic
+}
+skinparam note {
+  BackgroundColor #FFFBEA
+  BorderColor #C9A227
+}
+
+state "Nháp" as NHAP #F3F4F6;line:4B5563
+NHAP : entry / cho phép chỉnh sửa
+
+state "Chờ duyệt" as CHO #FDF4E3;line:B7791F
+CHO : entry / khóa chỉnh sửa,
+CHO : thêm vào danh sách chờ duyệt
+
+state "Đã xuất bản" as XB #E6F4F1;line:1F7A6B
+XB : entry / hiển thị trên
+XB : cổng thông tin công khai
+
+state "Đã gỡ" as GO #FBECEC;line:B23A3A
+GO : entry / ẩn khỏi cổng thông tin
+GO : và kết quả tìm kiếm
+
+[*] -right-> NHAP : tạo mới
+NHAP -> NHAP : chỉnh sửa
+NHAP -right-> CHO : gửi duyệt
+CHO -left-> NHAP : từ chối [có lý do]
+CHO -right-> XB : duyệt
+XB -down-> GO : gỡ nội dung
+XB --> NHAP : chỉnh sửa / tạm ẩn khỏi cổng công khai
+GO --> NHAP : chỉnh sửa lại
+NHAP -down-> [*] : xóa
+
+note bottom of XB
+  Chỉ nội dung «Đã xuất bản» mới
+  hiển thị cho khách tham quan.
+end note
+
+note bottom of NHAP
+  Chỉ được xóa khi nội dung
+  còn ở «Nháp».
+end note
+@enduml

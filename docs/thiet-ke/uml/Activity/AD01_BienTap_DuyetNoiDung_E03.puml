@@ -1,0 +1,49 @@
+' ============================================================
+'  Biểu đồ hoạt động – Quy trình biên tập và duyệt nội dung (E03)
+'  Xem trực tuyến: dán toàn bộ nội dung vào https://www.plantuml.com/plantuml
+' ============================================================
+@startuml AD01_BienTap_DuyetNoiDung_E03
+title Hình 5. Biểu đồ hoạt động – Quy trình biên tập và duyệt nội dung (E03)
+
+skinparam defaultFontName "Noto Sans"
+skinparam shadowing false
+skinparam ArrowColor #374151
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #374151
+  FontSize 13
+  DiamondBackgroundColor #FFFFFF
+  DiamondBorderColor #374151
+  DiamondFontStyle bold
+}
+skinparam swimlane {
+  BorderColor #6B7280
+  TitleFontStyle bold
+  TitleFontSize 15
+}
+
+|#FDF8EE|Biên tập viên|
+start
+:Chọn hiện vật hoặc triển lãm cần biên tập;
+repeat
+  :Soạn / chỉnh sửa mô tả công chúng;
+  :Bấm «Gửi duyệt»;
+  |#F4F5FA|Hệ thống|
+  :Chuyển trạng thái «Chờ duyệt», khóa chỉnh sửa;
+  :Thêm vào danh sách chờ duyệt;
+  |#F1F9F7|Quản lý bảo tàng|
+  :Mở bản xem trước nội dung;
+  if (Nội dung chính xác?) then ([có])
+    :Bấm «Duyệt»;
+  else ([không])
+    :Nhập lý do từ chối (bắt buộc);
+    |Hệ thống|
+    :Chuyển về «Nháp», lưu lý do từ chối;
+    |Biên tập viên|
+    :Xem lý do bị từ chối;
+  endif
+repeat while (Bị từ chối?) is ([có]) not ([không])
+|Hệ thống|
+:Chuyển «Đã xuất bản», hiển thị trên cổng thông tin công khai;
+stop
+@enduml

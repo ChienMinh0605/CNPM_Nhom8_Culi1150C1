@@ -1,0 +1,188 @@
+' ============================================================
+'  Biểu đồ lớp – Mô hình khái niệm (Domain Model) – DCSV Digital CMS
+'  Xem trực tuyến: dán toàn bộ nội dung vào https://www.plantuml.com/plantuml
+' ============================================================
+@startuml CD01_MoHinhKhaiNiem
+title Hình 10. Biểu đồ lớp – Mô hình khái niệm (Domain Model) – DCSV Digital CMS
+
+skinparam defaultFontName "Noto Sans"
+skinparam shadowing false
+skinparam ArrowColor #374151
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderThickness 1.5
+}
+skinparam note {
+  BackgroundColor #FFFBEA
+  BorderColor #C9A227
+}
+hide empty methods
+
+' ---------- E01 · Người dùng ----------
+class Account <<Tài khoản>> #E8EBF5 {
+  - id: Long
+  - email: String
+  - passwordHash: String
+  - fullName: String
+  - phone: String
+  - role: Role
+  - locked: boolean
+  - createdAt: DateTime
+}
+
+' ---------- E03 · Nội dung (lớp trừu tượng) ----------
+abstract class Content <<Nội dung>> #FDF4E3 {
+  - status: ContentStatus
+  - rejectReason: String
+  - createdAt: DateTime
+  - updatedAt: DateTime
+  + submitForReview(): void
+  + approve(): void
+  + reject(reason: String): void
+  + unpublish(): void
+  + edit(): void
+}
+
+' ---------- E02 · Hiện vật & tài nguyên số ----------
+class ExhibitionZone <<Khu trưng bày>> #E6F4F1 {
+  - code: String
+  - name: String
+  - periodRange: String
+  - description: Text
+  - coverImageUrl: String
+}
+class Artifact <<Hiện vật>> #E6F4F1 {
+  - code: String
+  - name: String
+  - dating: String
+  - material: String
+  - dimensions: String
+  - discoveryPlace: String
+  - conservationStatus: String
+  - storageLocation: String
+  - expertDescription: Text
+  - publicDescription: Text
+  - summary: String
+}
+class MediaAsset <<Tài nguyên số>> #E6F4F1 {
+  - type: MediaType
+  - url: String
+  - title: String
+  - source: String
+  - license: String
+  - visibility: Visibility
+  - sortOrder: int
+  - isCover: boolean
+}
+
+' ---------- E03 · Triển lãm ----------
+class Exhibition <<Triển lãm>> #FDF4E3 {
+  - title: String
+  - coverImageUrl: String
+  - introduction: Text
+  - startDate: Date
+  - endDate: Date
+}
+class ExhibitionItem <<Hiện vật trong triển lãm>> #FDF4E3 {
+  - orderIndex: int
+  - caption: Text
+}
+
+' ---------- E05 · Bán vé ----------
+class TicketOrder <<Đơn vé>> #FBECEC {
+  - orderCode: String
+  - visitDate: Date
+  - status: OrderStatus
+  - totalAmount: Money
+  - qrCode: String
+  - createdAt: DateTime
+  - expiresAt: DateTime
+  - paidAt: DateTime
+  - checkedInAt: DateTime
+  + markPaid(): void
+  + checkIn(): void
+  + cancel(): void
+  + isExpired(now: DateTime): boolean
+}
+class OrderItem <<Dòng vé>> #FBECEC {
+  - quantity: int
+  - unitPrice: Money
+}
+class TicketType <<Loại vé>> #FBECEC {
+  - name: String
+  - audience: String
+  - price: Money
+  - active: boolean
+}
+class TimeSlot <<Khung giờ>> #FBECEC {
+  - startTime: Time
+  - endTime: Time
+  - capacity: int
+}
+class Payment <<Giao dịch thanh toán>> #FBECEC {
+  - vnpTxnRef: String
+  - amount: Money
+  - responseCode: String
+  - status: String
+  - payDate: DateTime
+}
+class ClosedDay <<Ngày đóng cửa>> #FBECEC {
+  - date: Date
+  - reason: String
+}
+
+' ---------- Enumerations ----------
+enum ContentStatus {
+  DRAFT
+  PENDING
+  PUBLISHED
+  UNPUBLISHED
+}
+enum MediaType {
+  IMAGE
+  YOUTUBE_VIDEO
+}
+enum Visibility {
+  PUBLIC
+  INTERNAL
+}
+enum Role {
+  ADMIN
+  MANAGER
+  CURATOR
+  EDITOR
+  TICKET_STAFF
+  MEMBER
+}
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  USED
+  CANCELLED
+}
+
+' ---------- Quan hệ ----------
+Account "1" -- "0..*" Content : tạo >
+Content <|-- Artifact
+Content <|-- Exhibition
+ExhibitionZone "1" -- "0..*" Artifact : thuộc <
+Artifact "1" *-- "0..*" MediaAsset
+Exhibition "1" *-- "1..*" ExhibitionItem
+ExhibitionItem "0..*" -- "1" Artifact : trưng bày >
+Account "1" -- "0..*" TicketOrder : đặt >
+TicketOrder "1" *-- "1..*" OrderItem
+OrderItem "0..*" -- "1" TicketType
+TicketOrder "1" -- "0..*" Payment
+TicketOrder "0..*" -- "1" TimeSlot
+
+note top of Content
+  Vòng đời Content theo Hình 8.
+end note
+note right of OrderItem
+  unitPrice lưu giá tại thời điểm mua (NFR08).
+end note
+note bottom of TicketOrder
+  Vòng đời TicketOrder theo Hình 9.
+end note
+@enduml

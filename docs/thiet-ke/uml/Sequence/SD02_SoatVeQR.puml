@@ -1,0 +1,64 @@
+' ============================================================
+'  Biểu đồ tuần tự – Soát vé bằng mã QR (E05)
+'  Xem trực tuyến: dán toàn bộ nội dung vào https://www.plantuml.com/plantuml
+' ============================================================
+@startuml SD02_SoatVeQR
+title Hình 13. Biểu đồ tuần tự – Soát vé bằng mã QR (E05)
+
+skinparam defaultFontName "Noto Sans"
+skinparam shadowing false
+skinparam ArrowColor #374151
+skinparam sequenceMessageAlign center
+skinparam note {
+  BackgroundColor #FFFBEA
+  BorderColor #C9A227
+}
+autonumber "0."
+
+actor "Nhân viên quầy vé" as NV #1E3A5F
+boundary "Màn hình soát vé" as UI #EAF2FD
+participant "Controller soát vé\n<size:10>:CheckInController</size>" as CIC #EAF2FD
+participant "Xử lý soát vé\n<size:10>:CheckInService</size>" as CIS #E8EBF5
+participant "Dữ liệu đơn vé\n<size:10>:TicketOrderRepository</size>" as TOR #E6F4F1
+
+== ① Đọc mã vé ==
+NV -> UI : Quét mã QR bằng camera
+opt không quét được mã QR
+  NV -> UI : Nhập tay mã vé
+end
+
+== ② Kiểm tra vé ==
+UI -> CIC : Gửi mã vé\n<size:10><i>POST /check-in {code}</i></size>
+activate CIC
+CIC -> CIS : Soát vé\n<size:10><i>checkIn(code, staffId)</i></size>
+activate CIS
+CIS -> TOR : Tìm đơn theo mã\n<size:10><i>findByCode(code)</i></size>
+activate TOR
+TOR --> CIS : đơn vé (hoặc không có)
+deactivate TOR
+CIS -> CIS : Kiểm tra 4 điều kiện: tồn tại, đã thanh toán,\nđúng ngày, chưa sử dụng\n<size:10><i>validate(order, today)</i></size>
+opt vé hợp lệ
+  CIS -> TOR : Cập nhật vé «Đã sử dụng», ghi giờ vào\n<size:10><i>order.checkIn(), save(order)</i></size>
+  activate TOR
+  TOR --> CIS : đã lưu
+  deactivate TOR
+end
+CIS --> CIC : kết quả soát vé
+deactivate CIS
+CIC --> UI : hợp lệ / không hợp lệ + lý do + số khách
+deactivate CIC
+
+== ③ Hiển thị kết quả ==
+alt hợp lệ
+  UI --> NV : «HỢP LỆ» + số khách theo loại vé
+  NV -> NV : Cho đoàn khách vào cổng
+else không hợp lệ
+  UI --> NV : «KHÔNG HỢP LỆ» + lý do
+  NV -> NV : Hướng dẫn khách ra quầy hỗ trợ
+end
+
+note over UI, CIS
+  Lý do không hợp lệ: mã không tồn tại, chưa thanh toán, sai ngày tham quan,
+  đã sử dụng (FR44). Mỗi đơn có 1 mã QR, soát 1 lần cho cả đoàn.
+end note
+@enduml

@@ -1,0 +1,101 @@
+' ============================================================
+'  Biểu đồ use case chi tiết – Phân hệ Quản lý nội dung và tài nguyên số (E02 + E03)
+'  Xem trực tuyến: dán toàn bộ nội dung vào https://www.plantuml.com/plantuml
+'  hoặc trong draw.io: Sắp xếp (Arrange) > Chèn (Insert) > Nâng cao (Advanced) > PlantUML
+' ============================================================
+@startuml UC02_QuanLyNoiDung_E02_E03
+title Hình 3. Biểu đồ use case chi tiết – Phân hệ Quản lý nội dung và tài nguyên số (E02 + E03)
+left to right direction
+
+skinparam defaultFontName "Noto Sans"
+skinparam shadowing false
+skinparam ArrowColor #374151
+skinparam ArrowThickness 1.2
+skinparam actor {
+  BorderColor #1E3A5F
+  BackgroundColor #1E3A5F
+  FontStyle bold
+  FontColor #1E3A5F
+}
+skinparam usecase {
+  BorderThickness 1.5
+  FontStyle bold
+}
+skinparam rectangle {
+  BorderColor #6B7280
+  BorderStyle dashed
+  BackgroundColor #FCFCFD
+  FontStyle bold
+  FontSize 15
+}
+skinparam note {
+  BackgroundColor #FFFBEA
+  BorderColor #C9A227
+}
+
+' ---------- Tác nhân ----------
+actor "Chuyên viên sưu tập" as CVST
+actor "Biên tập viên" as BTV
+actor "Quản lý bảo tàng" as QLBT
+actor "Cloudinary" as CLOUD <<hệ thống>> #6B46A3;line:6B46A3
+
+rectangle "Phân hệ Quản lý nội dung và tài nguyên số (E02 + E03)" {
+  ' ----- E02 · Hiện vật & tài nguyên số (xanh ngọc) -----
+  usecase "Thêm hồ sơ hiện vật" as UC_THEM #E6F4F1;line:1F7A6B;text:155E52
+  usecase "Cập nhật / xóa\nhồ sơ hiện vật" as UC_SUA #E6F4F1;line:1F7A6B;text:155E52
+  usecase "Tìm kiếm & lọc hiện vật" as UC_TIM #E6F4F1;line:1F7A6B;text:155E52
+  usecase "Gắn ảnh vào hiện vật" as UC_GAN #E6F4F1;line:1F7A6B;text:155E52
+  usecase "Quản lý khu trưng bày" as UC_KHU #E6F4F1;line:1F7A6B;text:155E52
+  usecase "Sinh mã hiện vật\ntự động" as UC_MA #FFFFFF;line:1F7A6B;line.dashed;text:155E52
+  usecase "Tải ảnh lên" as UC_TAI #FFFFFF;line:1F7A6B;line.dashed;text:155E52
+  usecase "Nhúng video YouTube" as UC_VIDEO #FFFFFF;line:1F7A6B;line.dashed;text:155E52
+
+  ' ----- E03 · Biên tập & duyệt nội dung (vàng đất) -----
+  usecase "Viết mô tả công chúng" as UC_MOTA #FDF4E3;line:B7791F;text:7A4B0E
+  usecase "Tạo trang triển lãm" as UC_TL #FDF4E3;line:B7791F;text:7A4B0E
+  usecase "Gửi duyệt nội dung" as UC_GUI #FDF4E3;line:B7791F;text:7A4B0E
+  usecase "Xem «Nội dung của tôi»" as UC_CUATOI #FDF4E3;line:B7791F;text:7A4B0E
+  usecase "Duyệt & xuất bản\nnội dung" as UC_DUYET #FDF4E3;line:B7791F;text:7A4B0E
+  usecase "Gỡ nội dung\nđã xuất bản" as UC_GO #FDF4E3;line:B7791F;text:7A4B0E
+  usecase "Chọn, sắp xếp hiện vật\n& viết lời dẫn" as UC_CHON #FFFFFF;line:B7791F;line.dashed;text:7A4B0E
+  usecase "Xem trước nội dung" as UC_XEM #FFFFFF;line:B7791F;line.dashed;text:7A4B0E
+  usecase "Từ chối kèm lý do" as UC_TUCHOI #FFFFFF;line:B7791F;line.dashed;text:7A4B0E
+}
+
+' ---------- Liên kết tác nhân ----------
+CVST -- UC_THEM
+CVST -- UC_SUA
+CVST -- UC_TIM
+CVST -- UC_GAN
+CVST -- UC_KHU
+BTV -- UC_MOTA
+BTV -- UC_TL
+BTV -- UC_GUI
+BTV -- UC_CUATOI
+UC_DUYET -- QLBT
+UC_GO -- QLBT
+UC_TAI -- CLOUD
+
+' ---------- include / extend ----------
+UC_THEM ..> UC_MA : <<include>>
+UC_GAN ..> UC_TAI : <<include>>
+UC_VIDEO ..> UC_GAN : <<extend>>
+UC_TL ..> UC_CHON : <<include>>
+UC_DUYET ..> UC_XEM : <<include>>
+UC_TUCHOI ..> UC_DUYET : <<extend>>
+
+note right of UC_MA
+  Mã dạng DCSV-[khu]-[số],
+  không trùng, không sửa được.
+end note
+
+note right of UC_TAI
+  Ảnh mặc định «Nội bộ»; chỉ ảnh «Công khai»
+  hiển thị cho khách, kèm nguồn và giấy phép.
+end note
+
+note right of UC_TUCHOI
+  Bắt buộc nhập lý do,
+  nội dung quay về «Nháp».
+end note
+@enduml
