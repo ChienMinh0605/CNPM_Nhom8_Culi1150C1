@@ -150,13 +150,16 @@ cd frontend && flutter test
 
 ## Kế hoạch
 
-| Giai đoạn | Nội dung |
-|---|---|
-| Thiết kế chi tiết | ERD, wireframe, đặc tả API, khung dự án |
-| Sprint 1 | E01 + E02: đăng nhập, phân quyền, hồ sơ hiện vật, ảnh |
-| Sprint 2 | E03 + E04: biên tập, duyệt, cổng thông tin công khai |
-| Sprint 3 | E05 + E06: bán vé, VNPay Sandbox, soát vé QR, báo cáo |
-| Kiểm thử và hoàn thiện | Test case từ FR, 100–200 hiện vật mẫu, demo |
+Mỗi người làm trọn một mảng, 3 mảng chạy song song qua 3 sprint:
+
+| Người | Mảng | User Story |
+|---|---|---|
+| Trung | Tài khoản, phân quyền và cổng công khai | US01–US04, US11–US16 |
+| Hải | Hiện vật, biên tập và duyệt, báo cáo | US05–US10, US22 |
+| Chiến | Bán vé và soát vé | US17–US21 |
+
+Thứ tự: thiết kế chi tiết (ERD, wireframe, API) → Sprint 1 → Sprint 2 → Sprint 3 → kiểm thử và demo.
+Chi tiết từng sprint: [docs/quan-ly/backlog.md](docs/quan-ly/backlog.md).
 
 ## Nhóm thực hiện
 
