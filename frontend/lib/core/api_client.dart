@@ -28,6 +28,20 @@ class ApiClient {
     return _decode(response);
   }
 
+  /// POST, PUT, DELETE. Trả về map rỗng khi máy chủ không gửi nội dung (204).
+  Future<Map<String, dynamic>> send(
+    String method,
+    String path, [
+    Map<String, dynamic>? body,
+  ]) async {
+    final request = http.Request(method, Uri.parse('$_baseUrl$path'));
+    if (body != null) {
+      request.headers['Content-Type'] = 'application/json';
+      request.body = jsonEncode(body);
+    }
+    return _decode(await http.Response.fromStream(await _http.send(request)));
+  }
+
   Map<String, dynamic> _decode(http.Response response) {
     final body = response.body.isEmpty
         ? <String, dynamic>{}
