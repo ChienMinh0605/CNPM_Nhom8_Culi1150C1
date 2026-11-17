@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../features/admin/admin_home_page.dart';
+import '../features/admin/ticket_settings_page.dart';
 import '../features/auth/login_page.dart';
 import '../features/checkin/check_in_page.dart';
 import '../features/portal/home_page.dart';
@@ -13,6 +14,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/quan-tri',
       builder: (context, state) => const AdminHomePage(),
+    ),
+    GoRoute(
+      path: '/quan-tri/ve',
+      builder: (context, state) => const TicketSettingsPage(),
     ),
     GoRoute(path: '/soat-ve', builder: (context, state) => const CheckInPage()),
   ],
