@@ -11,6 +11,7 @@ option(BUILD_TESTS "Build unit test (GoogleTest)" OFF)
 # ---- dcsv_core: logic thuần C++, không phụ thuộc Drogon, test được độc lập ----
 add_library(dcsv_core
   src/utils/ArtifactCode.cc
+  src/utils/DateTime.cc
 )
 target_include_directories(dcsv_core PUBLIC src)
 
