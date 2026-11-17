@@ -12,8 +12,12 @@ option(BUILD_TESTS "Build unit test (GoogleTest)" OFF)
 add_library(dcsv_core
   src/utils/ArtifactCode.cc
   src/utils/DateTime.cc
+  src/utils/VnpaySignature.cc
 )
 target_include_directories(dcsv_core PUBLIC src)
+# HMAC-SHA512 để ký VNPay.
+find_package(OpenSSL REQUIRED)
+target_link_libraries(dcsv_core PRIVATE OpenSSL::Crypto)
 
 # ---- dcsv_server: máy chủ REST dùng Drogon ----
 if(BUILD_SERVER)
