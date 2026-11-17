@@ -6,6 +6,7 @@
 #include "utils/VnpaySignature.h"
 
 using dcsv::VnpayParams;
+using dcsv::vnpayPaymentUrl;
 using dcsv::vnpayQuery;
 using dcsv::vnpaySign;
 using dcsv::vnpayVerify;
@@ -37,6 +38,15 @@ TEST(VnpaySignature, QueryIsSortedEncodedAndSkipsEmpty) {
 
 TEST(VnpaySignature, SignsWithHmacSha512) {
   EXPECT_EQ(vnpaySign(sampleParams(), SECRET), EXPECTED_HASH);
+}
+
+TEST(VnpaySignature, PaymentUrlCarriesQueryAndHash) {
+  EXPECT_EQ(vnpayPaymentUrl("https://pay.test/vpcpay.html", sampleParams(),
+                            SECRET),
+            std::string("https://pay.test/vpcpay.html?vnp_Amount=4000000"
+                        "&vnp_OrderInfo=Thanh+toan+don+DV-0001"
+                        "&vnp_TxnRef=DV-0001&vnp_SecureHash=") +
+                EXPECTED_HASH);
 }
 
 TEST(VnpaySignature, VerifyAcceptsValidHashInAnyCase) {

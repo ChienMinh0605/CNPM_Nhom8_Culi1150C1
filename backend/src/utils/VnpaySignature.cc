@@ -57,6 +57,13 @@ std::string vnpaySign(const VnpayParams &params, const std::string &hashSecret) 
   return hex;
 }
 
+std::string vnpayPaymentUrl(const std::string &baseUrl,
+                            const VnpayParams &params,
+                            const std::string &hashSecret) {
+  return baseUrl + '?' + vnpayQuery(params) +
+         "&vnp_SecureHash=" + vnpaySign(params, hashSecret);
+}
+
 bool vnpayVerify(VnpayParams params, const std::string &hashSecret) {
   std::string received = params["vnp_SecureHash"];
   params.erase("vnp_SecureHash");
