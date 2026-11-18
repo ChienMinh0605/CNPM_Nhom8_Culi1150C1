@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "jobs/ExpiredOrderJob.h"
 #include "utils/Env.h"
 
 using dcsv::env;
@@ -64,6 +65,7 @@ void setupCors(const std::string &allowedOrigin) {
 int main() {
   drogon::app().loadConfigJson(buildConfig());
   setupCors(env("CORS_ALLOWED_ORIGIN", "*"));
+  dcsv::startExpiredOrderJob();
 
   LOG_INFO << "DCSV backend chạy ở cổng " << envInt("BACKEND_PORT", 8080);
   drogon::app().run();

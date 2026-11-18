@@ -41,6 +41,9 @@ class TicketOrderService {
   // Trang kết quả sau khi VNPay chuyển khách về: kiểm chữ ký rồi trả đơn kèm
   // responseCode của VNPay. Không đổi trạng thái đơn, việc đó chỉ IPN làm.
   static drogon::Task<Json::Value> paymentResult(VnpayParams params);
+
+  // Chạy định kỳ: hủy đơn quá 15 phút chưa thanh toán (FR41).
+  static drogon::Task<int> cancelExpiredOrders();
 };
 
 }  // namespace dcsv

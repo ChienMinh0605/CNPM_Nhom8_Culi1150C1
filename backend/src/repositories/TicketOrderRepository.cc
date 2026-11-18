@@ -170,4 +170,12 @@ drogon::Task<bool> TicketOrderRepository::markPaid(drogon::orm::DbClientPtr db,
   co_return result.affectedRows() > 0;
 }
 
+drogon::Task<int> TicketOrderRepository::cancelExpired(
+    drogon::orm::DbClientPtr db) {
+  const auto result = co_await db->execSqlCoro(
+      "UPDATE ticket_orders SET status = 'CANCELLED' "
+      "WHERE status = 'PENDING' AND expires_at <= now()");
+  co_return static_cast<int>(result.affectedRows());
+}
+
 }  // namespace dcsv

@@ -133,4 +133,9 @@ drogon::Task<Json::Value> TicketOrderService::paymentResult(VnpayParams params) 
   co_return order;
 }
 
+drogon::Task<int> TicketOrderService::cancelExpiredOrders() {
+  co_return co_await TicketOrderRepository::cancelExpired(
+      drogon::app().getDbClient());
+}
+
 }  // namespace dcsv

@@ -52,6 +52,9 @@ class TicketOrderRepository {
   // Trả false nếu không đổi được.
   static drogon::Task<bool> markPaid(drogon::orm::DbClientPtr db,
                                      std::string code);
+
+  // Hủy các đơn Chờ thanh toán đã hết giữ chỗ (FR41). Trả số đơn đã hủy.
+  static drogon::Task<int> cancelExpired(drogon::orm::DbClientPtr db);
 };
 
 }  // namespace dcsv
