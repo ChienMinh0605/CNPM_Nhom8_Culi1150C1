@@ -34,6 +34,10 @@ class _CheckInPageState extends State<CheckInPage> {
   Map<String, dynamic>? _result;
   String? _error;
 
+  /// Mã vừa soát. Camera bỏ qua mã này để khi bấm «Quét vé tiếp» mà khách
+  /// chưa cất vé thì không báo nhầm «đã sử dụng»; nhập tay thì vẫn soát được.
+  String? _lastCode;
+
   @override
   void dispose() {
     _scanner?.dispose();
@@ -43,7 +47,7 @@ class _CheckInPageState extends State<CheckInPage> {
 
   void _onDetect(BarcodeCapture capture) {
     final code = capture.barcodes.firstOrNull?.rawValue;
-    if (code != null) _check(code);
+    if (code != null && code != _lastCode) _check(code);
   }
 
   Future<void> _check(String code) async {
@@ -53,6 +57,7 @@ class _CheckInPageState extends State<CheckInPage> {
     setState(() {
       _checking = true;
       _error = null;
+      _lastCode = code;
     });
     try {
       final result = await _api.send('POST', '/api/v1/check-in', {
@@ -60,7 +65,13 @@ class _CheckInPageState extends State<CheckInPage> {
       });
       if (mounted) setState(() => _result = result);
     } catch (error) {
-      if (mounted) setState(() => _error = errorText(error));
+      // Lỗi mạng thì chưa soát được, cho camera quét lại đúng mã này.
+      if (mounted) {
+        setState(() {
+          _error = errorText(error);
+          _lastCode = null;
+        });
+      }
     } finally {
       if (mounted) setState(() => _checking = false);
     }

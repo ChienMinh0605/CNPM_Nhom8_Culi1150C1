@@ -68,6 +68,10 @@ void main() {
     await tester.tap(find.text('Quét vé tiếp'));
     await tester.pumpAndSettle();
     expect(find.text('HỢP LỆ'), findsNothing);
+
+    // Camera bỏ qua mã vừa soát, còn nhập tay thì vẫn soát lại được.
+    await _enter(tester, 'abc');
+    expect(sent, hasLength(2));
   });
 
   testWidgets('vé không hợp lệ hiện lý do', (tester) async {
