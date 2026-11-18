@@ -65,6 +65,8 @@ std::string vnpayPaymentUrl(const std::string &baseUrl,
 }
 
 bool vnpayVerify(VnpayParams params, const std::string &hashSecret) {
+  // Khóa rỗng thì ai cũng tự ký được, nên coi như không hợp lệ.
+  if (hashSecret.empty()) return false;
   std::string received = params["vnp_SecureHash"];
   params.erase("vnp_SecureHash");
   params.erase("vnp_SecureHashType");

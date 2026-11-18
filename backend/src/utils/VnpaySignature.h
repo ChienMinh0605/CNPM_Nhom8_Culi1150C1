@@ -23,6 +23,7 @@ std::string vnpayPaymentUrl(const std::string &baseUrl,
 
 // Kiểm tra vnp_SecureHash trong tham số VNPay gửi về (return URL, IPN).
 // Chỉ khi hàm này trả true mới được đổi trạng thái đơn (NFR06).
+// Luôn trả false nếu hashSecret rỗng (chưa điền VNPAY_HASH_SECRET).
 bool vnpayVerify(VnpayParams params, const std::string &hashSecret);
 
 }  // namespace dcsv

@@ -71,3 +71,9 @@ TEST(VnpaySignature, VerifyRejectsTamperedOrMissingHash) {
   params["vnp_Amount"] = "1000";  // sửa số tiền sau khi ký
   EXPECT_FALSE(vnpayVerify(params, SECRET));
 }
+
+TEST(VnpaySignature, VerifyRejectsEverythingWhenSecretIsEmpty) {
+  auto params = sampleParams();
+  params["vnp_SecureHash"] = vnpaySign(params, "");  // tự ký bằng khóa rỗng
+  EXPECT_FALSE(vnpayVerify(params, ""));
+}
