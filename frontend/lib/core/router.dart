@@ -19,7 +19,11 @@ final GoRouter appRouter = GoRouter(
     // VNPay chuyển về đây kèm tham số vnp_* (VNPAY_RETURN_URL trong .env).
     GoRoute(
       path: '/ket-qua-thanh-toan',
-      builder: (context, state) => PaymentResultPage(query: state.uri.query),
+      // VNPay có thể gắn tham số trước dấu # (…/?vnp_…#/ket-qua-thanh-toan)
+      // thay vì sau, nên tìm cả ở đường dẫn thật của trình duyệt.
+      builder: (context, state) => PaymentResultPage(
+        query: state.uri.query.isNotEmpty ? state.uri.query : Uri.base.query,
+      ),
     ),
     GoRoute(path: '/dang-nhap', builder: (context, state) => const LoginPage()),
     GoRoute(
