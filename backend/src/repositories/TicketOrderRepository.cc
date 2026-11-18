@@ -131,7 +131,9 @@ drogon::Task<Json::Value> TicketOrderRepository::findByCode(
   const auto rows = co_await db->execSqlCoro(
       "SELECT o.id, o.code, o.status, to_char(o.visit_date, 'YYYY-MM-DD') "
       "AS visit_date, to_char(s.start_time, 'HH24:MI') AS start_time, "
-      "to_char(s.end_time, 'HH24:MI') AS end_time, o.total_amount "
+      "to_char(s.end_time, 'HH24:MI') AS end_time, o.total_amount, "
+      "to_char(o.checked_in_at AT TIME ZONE 'Asia/Ho_Chi_Minh', "
+      "'YYYY-MM-DD\"T\"HH24:MI:SS\"+07:00\"') AS checked_in_at "
       "FROM ticket_orders o JOIN time_slots s ON s.id = o.time_slot_id "
       "WHERE o.code = $1",
       code);
@@ -144,6 +146,9 @@ drogon::Task<Json::Value> TicketOrderRepository::findByCode(
   order["startTime"] = row["start_time"].as<std::string>();
   order["endTime"] = row["end_time"].as<std::string>();
   order["totalAmount"] = row["total_amount"].as<int>();
+  order["checkedInAt"] = row["checked_in_at"].isNull()
+                             ? Json::Value()
+                             : Json::Value(row["checked_in_at"].as<std::string>());
   order["items"] = Json::Value(Json::arrayValue);
   const auto items = co_await db->execSqlCoro(
       "SELECT t.name, i.quantity, i.unit_price FROM order_items i "
@@ -166,6 +171,19 @@ drogon::Task<bool> TicketOrderRepository::markPaid(drogon::orm::DbClientPtr db,
   const auto result = co_await db->execSqlCoro(
       "UPDATE ticket_orders SET status = 'PAID', paid_at = now() "
       "WHERE code = $1 AND status = 'PENDING' AND expires_at > now()",
+      code);
+  co_return result.affectedRows() > 0;
+}
+
+drogon::Task<bool> TicketOrderRepository::markUsed(drogon::orm::DbClientPtr db,
+                                                   std::string code) {
+  // Một câu UPDATE có điều kiện nên hai cổng quét cùng một vé thì chỉ một
+  // cổng thành công.
+  const auto result = co_await db->execSqlCoro(
+      std::string("UPDATE ticket_orders SET status = 'USED', "
+                  "checked_in_at = now() WHERE code = $1 AND status = 'PAID' "
+                  "AND visit_date = ") +
+          VN_NOW + "::date",
       code);
   co_return result.affectedRows() > 0;
 }
