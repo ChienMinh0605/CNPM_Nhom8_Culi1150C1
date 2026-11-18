@@ -28,6 +28,15 @@ drogon::Task<Json::Value> TicketTypeRepository::findAll() {
   co_return items;
 }
 
+drogon::Task<Json::Value> TicketTypeRepository::findActive() {
+  const auto rows = co_await drogon::app().getDbClient()->execSqlCoro(
+      std::string("SELECT ") + COLUMNS +
+      " FROM ticket_types WHERE active ORDER BY id");
+  Json::Value items(Json::arrayValue);
+  for (const auto &row : rows) items.append(toJson(row));
+  co_return items;
+}
+
 drogon::Task<Json::Value> TicketTypeRepository::insert(std::string name,
                                                        std::string audience,
                                                        int price, bool active) {

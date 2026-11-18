@@ -12,6 +12,8 @@ namespace dcsv {
 class TicketTypeRepository {
  public:
   static drogon::Task<Json::Value> findAll();
+  // Chỉ loại vé đang bán, cho trang mua vé (FR35).
+  static drogon::Task<Json::Value> findActive();
   static drogon::Task<Json::Value> insert(std::string name, std::string audience,
                                           int price, bool active);
   // Trả null nếu không có loại vé này.

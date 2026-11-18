@@ -90,6 +90,7 @@ NV = Nhân viên quầy vé, TV = Thành viên.
 | GET, POST | `/time-slots` | QL | FR36 |
 | PUT, DELETE | `/time-slots/{id}` | QL | FR36 |
 | GET, POST, DELETE | `/closed-days` | QL | FR37 |
+| GET | `/public/ticket-types` | mọi người | FR35, FR38 |
 | GET | `/public/availability?date=` | mọi người | FR38 |
 | POST | `/orders` | TV | FR38, FR39 |
 | GET | `/orders/mine` | TV | FR42 |

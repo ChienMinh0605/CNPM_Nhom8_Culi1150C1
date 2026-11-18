@@ -85,6 +85,10 @@ class _HomePageState extends State<HomePage> {
                 runSpacing: 12,
                 children: [
                   FilledButton(
+                    onPressed: () => context.go('/mua-ve'),
+                    child: const Text('Mua vé'),
+                  ),
+                  OutlinedButton(
                     onPressed: () => context.go('/dang-nhap'),
                     child: const Text('Đăng nhập'),
                   ),

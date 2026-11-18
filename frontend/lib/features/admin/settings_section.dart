@@ -4,10 +4,6 @@ import '../../core/api_client.dart';
 
 typedef Item = Map<String, dynamic>;
 
-String errorText(Object error) => error is ApiException
-    ? error.message
-    : 'Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.';
-
 /// Một khối thiết lập: tiêu đề, nút thêm và danh sách tải từ [path].
 /// Tự lo các trạng thái đang tải, lỗi và rỗng.
 class SettingsSection extends StatefulWidget {

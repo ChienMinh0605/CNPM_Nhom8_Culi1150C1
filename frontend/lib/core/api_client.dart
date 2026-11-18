@@ -14,6 +14,11 @@ class ApiException implements Exception {
   String toString() => 'ApiException($statusCode): $message';
 }
 
+/// Câu báo lỗi cho người dùng: lời máy chủ trả về, hoặc lỗi mất kết nối.
+String errorText(Object error) => error is ApiException
+    ? error.message
+    : 'Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.';
+
 /// Gọi REST API của backend. Token đăng nhập sẽ được gắn vào đây ở Sprint 1.
 class ApiClient {
   ApiClient({http.Client? httpClient, String? baseUrl})

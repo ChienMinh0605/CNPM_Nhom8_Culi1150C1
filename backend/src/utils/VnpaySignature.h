@@ -16,8 +16,14 @@ std::string vnpayQuery(const VnpayParams &params);
 // Chữ ký HMAC-SHA512 (hex thường) của vnpayQuery(params).
 std::string vnpaySign(const VnpayParams &params, const std::string &hashSecret);
 
+// Đường dẫn chuyển khách sang cổng VNPay: baseUrl kèm tham số và chữ ký.
+std::string vnpayPaymentUrl(const std::string &baseUrl,
+                            const VnpayParams &params,
+                            const std::string &hashSecret);
+
 // Kiểm tra vnp_SecureHash trong tham số VNPay gửi về (return URL, IPN).
 // Chỉ khi hàm này trả true mới được đổi trạng thái đơn (NFR06).
+// Luôn trả false nếu hashSecret rỗng (chưa điền VNPAY_HASH_SECRET).
 bool vnpayVerify(VnpayParams params, const std::string &hashSecret);
 
 }  // namespace dcsv
