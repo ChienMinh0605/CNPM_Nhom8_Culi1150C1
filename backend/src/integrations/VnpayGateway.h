@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "utils/VnpaySignature.h"
+
 namespace dcsv {
 
 // Cổng thanh toán VNPay Sandbox. Cấu hình lấy từ biến môi trường VNPAY_*.
@@ -12,6 +14,9 @@ class VnpayGateway {
   static std::string createPaymentUrl(const std::string &orderCode, int amount,
                                       const std::string &clientIp,
                                       int holdMinutes);
+
+  // Chữ ký VNPay gửi về (IPN, trang kết quả) có khớp khóa của mình không.
+  static bool verify(const VnpayParams &params);
 };
 
 }  // namespace dcsv

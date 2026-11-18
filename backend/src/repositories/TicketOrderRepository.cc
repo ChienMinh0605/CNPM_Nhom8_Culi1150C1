@@ -126,4 +126,48 @@ drogon::Task<Json::Value> TicketOrderRepository::insert(
   co_return order;
 }
 
+drogon::Task<Json::Value> TicketOrderRepository::findByCode(
+    drogon::orm::DbClientPtr db, std::string code) {
+  const auto rows = co_await db->execSqlCoro(
+      "SELECT o.id, o.code, o.status, to_char(o.visit_date, 'YYYY-MM-DD') "
+      "AS visit_date, to_char(s.start_time, 'HH24:MI') AS start_time, "
+      "to_char(s.end_time, 'HH24:MI') AS end_time, o.total_amount "
+      "FROM ticket_orders o JOIN time_slots s ON s.id = o.time_slot_id "
+      "WHERE o.code = $1",
+      code);
+  if (rows.empty()) co_return Json::Value();
+  const auto &row = rows[0];
+  Json::Value order;
+  order["code"] = row["code"].as<std::string>();
+  order["status"] = row["status"].as<std::string>();
+  order["visitDate"] = row["visit_date"].as<std::string>();
+  order["startTime"] = row["start_time"].as<std::string>();
+  order["endTime"] = row["end_time"].as<std::string>();
+  order["totalAmount"] = row["total_amount"].as<int>();
+  order["items"] = Json::Value(Json::arrayValue);
+  const auto items = co_await db->execSqlCoro(
+      "SELECT t.name, i.quantity, i.unit_price FROM order_items i "
+      "JOIN ticket_types t ON t.id = i.ticket_type_id "
+      "WHERE i.order_id = $1 ORDER BY t.id",
+      row["id"].as<Json::Int64>());
+  for (const auto &itemRow : items) {
+    Json::Value item;
+    item["name"] = itemRow["name"].as<std::string>();
+    item["quantity"] = itemRow["quantity"].as<int>();
+    item["unitPrice"] = itemRow["unit_price"].as<int>();
+    order["items"].append(item);
+  }
+  co_return order;
+}
+
+drogon::Task<bool> TicketOrderRepository::markPaid(drogon::orm::DbClientPtr db,
+                                                   std::string code) {
+  // Hết giữ chỗ thì chỗ đã được trả lại, có thể đã bán cho người khác (NFR07).
+  const auto result = co_await db->execSqlCoro(
+      "UPDATE ticket_orders SET status = 'PAID', paid_at = now() "
+      "WHERE code = $1 AND status = 'PENDING' AND expires_at > now()",
+      code);
+  co_return result.affectedRows() > 0;
+}
+
 }  // namespace dcsv

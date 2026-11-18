@@ -4,7 +4,6 @@
 #include <ctime>
 
 #include "utils/Env.h"
-#include "utils/VnpaySignature.h"
 
 namespace dcsv {
 
@@ -48,6 +47,10 @@ std::string VnpayGateway::createPaymentUrl(const std::string &orderCode,
       env("VNPAY_PAYMENT_URL",
           "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"),
       params, env("VNPAY_HASH_SECRET"));
+}
+
+bool VnpayGateway::verify(const VnpayParams &params) {
+  return vnpayVerify(params, env("VNPAY_HASH_SECRET"));
 }
 
 }  // namespace dcsv

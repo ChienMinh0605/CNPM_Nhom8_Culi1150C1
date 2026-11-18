@@ -42,6 +42,16 @@ class TicketOrderRepository {
                                           std::string date, long slotId,
                                           int totalAmount, std::string itemsJson,
                                           int holdMinutes);
+
+  // { code, status, visitDate, startTime, endTime, totalAmount,
+  //   items: [{ name, quantity, unitPrice }] }; null nếu không có đơn này.
+  static drogon::Task<Json::Value> findByCode(drogon::orm::DbClientPtr db,
+                                              std::string code);
+
+  // Chuyển đơn sang Đã thanh toán nếu còn Chờ thanh toán và chưa hết giữ chỗ.
+  // Trả false nếu không đổi được.
+  static drogon::Task<bool> markPaid(drogon::orm::DbClientPtr db,
+                                     std::string code);
 };
 
 }  // namespace dcsv

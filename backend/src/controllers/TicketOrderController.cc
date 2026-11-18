@@ -22,11 +22,22 @@ HttpResponsePtr badDate() {
                    "Ngày phải có dạng YYYY-MM-DD");
 }
 
-// Hết chỗ là xung đột (409); các lý do còn lại là dữ liệu vào sai (400).
+// Hết chỗ là xung đột (409), không có đơn là 404; còn lại là dữ liệu vào
+// sai (400).
 HttpResponsePtr orderError(const OrderError &e) {
-  return makeError(
-      e.code == "SOLD_OUT" ? drogon::k409Conflict : drogon::k400BadRequest,
-      e.code, e.what());
+  const auto status = e.code == "SOLD_OUT"    ? drogon::k409Conflict
+                      : e.code == "NOT_FOUND" ? drogon::k404NotFound
+                                              : drogon::k400BadRequest;
+  return makeError(status, e.code, e.what());
+}
+
+// Chỉ lấy tham số vnp_* để kiểm chữ ký.
+dcsv::VnpayParams vnpayParams(const HttpRequestPtr &req) {
+  dcsv::VnpayParams params;
+  for (const auto &[name, value] : req->getParameters()) {
+    if (name.rfind("vnp_", 0) == 0) params[name] = value;
+  }
+  return params;
 }
 
 // Mỗi dòng một loại vé khác nhau, số lượng dương, cả đơn tối đa 10 vé (FR38).
@@ -98,4 +109,19 @@ Task<HttpResponsePtr> TicketOrderController::create(HttpRequestPtr req) {
   auto resp = HttpResponse::newHttpJsonResponse(order);
   resp->setStatusCode(drogon::k201Created);
   co_return resp;
+}
+
+Task<HttpResponsePtr> TicketOrderController::paymentReturn(HttpRequestPtr req) {
+  Json::Value order;
+  try {
+    order = co_await TicketOrderService::paymentResult(vnpayParams(req));
+  } catch (const OrderError &e) {
+    co_return orderError(e);
+  }
+  co_return HttpResponse::newHttpJsonResponse(order);
+}
+
+Task<HttpResponsePtr> TicketOrderController::paymentIpn(HttpRequestPtr req) {
+  co_return HttpResponse::newHttpJsonResponse(
+      co_await TicketOrderService::confirmPayment(vnpayParams(req)));
 }
