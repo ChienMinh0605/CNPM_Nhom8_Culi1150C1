@@ -43,14 +43,20 @@ class TicketOrderRepository {
                                           int totalAmount, std::string itemsJson,
                                           int holdMinutes);
 
-  // { code, status, visitDate, startTime, endTime, totalAmount,
+  // { code, status, visitDate, startTime, endTime, totalAmount, checkedInAt,
   //   items: [{ name, quantity, unitPrice }] }; null nếu không có đơn này.
+  // checkedInAt là giờ Việt Nam dạng ISO 8601, null nếu chưa soát.
   static drogon::Task<Json::Value> findByCode(drogon::orm::DbClientPtr db,
                                               std::string code);
 
   // Chuyển đơn sang Đã thanh toán nếu còn Chờ thanh toán và chưa hết giữ chỗ.
   // Trả false nếu không đổi được.
   static drogon::Task<bool> markPaid(drogon::orm::DbClientPtr db,
+                                     std::string code);
+
+  // Soát vé: chuyển đơn Đã thanh toán của hôm nay (giờ Việt Nam) sang Đã sử
+  // dụng và ghi giờ vào (FR45). Trả false nếu không đổi được.
+  static drogon::Task<bool> markUsed(drogon::orm::DbClientPtr db,
                                      std::string code);
 
   // Hủy các đơn Chờ thanh toán đã hết giữ chỗ (FR41). Trả số đơn đã hủy.
